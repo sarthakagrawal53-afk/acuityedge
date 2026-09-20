@@ -792,9 +792,23 @@ class Component extends DCLogic {
     };
     this.measure();
     window.addEventListener("resize", this.measure);
+    this.allowScroll = () => {
+      document.querySelectorAll("image-slot").forEach((el) => {
+        const r = el.shadowRoot;
+        if (!r || r.querySelector("[data-scrollfix]")) return;
+        const st = document.createElement("style");
+        st.setAttribute("data-scrollfix", "");
+        st.textContent = ".frame img,.frame{touch-action:pan-y !important}";
+        r.appendChild(st);
+      });
+    };
+    this.allowScroll();
+    this.scrollFixTimers = [setTimeout(this.allowScroll, 400), setTimeout(this.allowScroll, 1500)];
   }
+  componentDidUpdate() { if (this.allowScroll) this.allowScroll(); }
   componentWillUnmount() {
     if (this.measure) window.removeEventListener("resize", this.measure);
+    (this.scrollFixTimers || []).forEach(clearTimeout);
   }
   go(page) {
     return (e) => {
